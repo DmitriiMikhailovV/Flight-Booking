@@ -2,12 +2,11 @@ import { configureStore } from '@reduxjs/toolkit'
 import { useSelector } from 'react-redux'
 import { TypedUseSelectorHook } from 'react-redux'
 
-import { flightSlice, flightFilterSlice } from './features'
+import { flightSlice } from './features'
 
 export const store = configureStore({
   reducer: {
-    flights: flightSlice.reducer,
-    flightFilter: flightFilterSlice.reducer,
+    flightSlice: flightSlice.reducer,
   },
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware({ immutableCheck: true })

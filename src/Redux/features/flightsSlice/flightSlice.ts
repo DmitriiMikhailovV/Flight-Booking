@@ -2,10 +2,31 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { fetchMockData } from 'src/fakeFetch'
 import type { TFetchFlights, TFlightSlice } from './types'
 
+export const dateToUnix = (date: Date) => {
+  return Math.round(date.getTime() / 1000)
+}
+
+export const unixToDate = (unixTimestamp: number) =>
+  new Date(unixTimestamp * 1000)
+
 const initialState: TFetchFlights = {
   flights: [],
   loadingFlights: false,
   errorFlights: '',
+  flightFilter: {
+    from: '',
+    to: '',
+    departure: {
+      startDate: dateToUnix(new Date()),
+      endDate: dateToUnix(new Date()),
+    },
+    arrival: {
+      startDate: dateToUnix(new Date()),
+      endDate: dateToUnix(new Date()),
+    },
+    duration: { min: 0, max: 24 },
+    price: { min: 0, max: 1000 },
+  },
 }
 
 export const fetchFlights = createAsyncThunk<
@@ -30,9 +51,16 @@ export const fetchFlights = createAsyncThunk<
 })
 
 export const flightSlice = createSlice({
-  name: 'flight',
+  name: 'flightSlice',
   initialState,
-  reducers: {},
+  reducers: {
+    setFilter: (state, action) => {
+      return {
+        ...state,
+        flightFilter: { ...state.flightFilter, ...action.payload },
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(fetchFlights.pending, (state) => {
       return { ...state, loadingFlights: true, errorFlights: '' }
@@ -55,3 +83,5 @@ export const flightSlice = createSlice({
     })
   },
 })
+
+export const { setFilter } = flightSlice.actions

@@ -4,7 +4,7 @@ import { TButton } from './type'
 
 export const Button: FC<TButton> = ({ label, onClick }) => {
   return (
-    <MUIButton variant="contained" color="primary" onClick={onClick}>
+    <MUIButton fullWidth variant="contained" color="primary" onClick={onClick}>
       {label}
     </MUIButton>
   )

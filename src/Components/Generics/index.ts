@@ -1,2 +1,5 @@
 export { InputField } from './InputField'
 export { Button } from './Button'
+export { Table } from './Table'
+export { RangeInput } from './RangeInput'
+export { DateRangeInput } from './DateRangeInput'
