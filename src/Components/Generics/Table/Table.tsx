@@ -13,7 +13,7 @@ import { TTable } from './type'
 
 export const Table: FC<TTable> = ({ columns, data }) => {
   return data.length > 0 ? (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={{ marginBottom: '16px' }}>
       <MUITable>
         <TableHead>
           <TableRow>

@@ -1,32 +1,13 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { fetchMockData } from 'src/fakeFetch'
+import { convertToUnixTimestamp, parseDuration } from 'src/helpers'
 import type { TFetchFlights, TFlightSlice } from './types'
-
-export const dateToUnix = (date: Date) => {
-  return Math.round(date.getTime() / 1000)
-}
-
-export const unixToDate = (unixTimestamp: number) =>
-  new Date(unixTimestamp * 1000)
 
 const initialState: TFetchFlights = {
   flights: [],
+  filteredFlights: [],
   loadingFlights: false,
   errorFlights: '',
-  flightFilter: {
-    from: '',
-    to: '',
-    departure: {
-      startDate: dateToUnix(new Date()),
-      endDate: dateToUnix(new Date()),
-    },
-    arrival: {
-      startDate: dateToUnix(new Date()),
-      endDate: dateToUnix(new Date()),
-    },
-    duration: { min: 0, max: 24 },
-    price: { min: 0, max: 1000 },
-  },
 }
 
 export const fetchFlights = createAsyncThunk<
@@ -35,8 +16,6 @@ export const fetchFlights = createAsyncThunk<
   { rejectValue: string }
 >('flight/fetchFlights', async (_, { rejectWithValue }) => {
   try {
-    // with real api request
-    // const response = await axios.get('https://booking.com/api/bookingFlight')
     const response = await fetchMockData(
       'https://booking.com/api/bookingFlight'
     )
@@ -54,34 +33,70 @@ export const flightSlice = createSlice({
   name: 'flightSlice',
   initialState,
   reducers: {
-    setFilter: (state, action) => {
+    updateFilteredFlights: (state, action) => {
+      const { arrival, departure, from, to, duration, price } = action.payload
+      const { startDate: arrivalStartDate, endDate: arrivalEndDate } = arrival
+      const { startDate: departureStartDate, endDate: departureEndDate } =
+        departure
+
+      const filteredFlights = state.flights.filter((flight) => {
+        const parsedDuration = parseDuration(flight.duration)
+        const isWithinArrivalDateRange =
+          (arrivalStartDate === null ||
+            convertToUnixTimestamp(flight.arrival) >= arrivalStartDate) &&
+          (arrivalEndDate === null ||
+            convertToUnixTimestamp(flight.arrival) <= arrivalEndDate)
+
+        const isWithinDepartureDateRange =
+          (departureStartDate === null ||
+            convertToUnixTimestamp(flight.departure) >= departureStartDate) &&
+          (departureEndDate === null ||
+            convertToUnixTimestamp(flight.departure) <= departureEndDate)
+
+        return (
+          flight.from.toLowerCase().includes(from.toLowerCase()) &&
+          flight.to.toLowerCase().includes(to.toLowerCase()) &&
+          parsedDuration >= duration.min &&
+          parsedDuration <= duration.max &&
+          flight.price >= price.min &&
+          flight.price <= price.max &&
+          isWithinArrivalDateRange &&
+          isWithinDepartureDateRange
+        )
+      })
+
       return {
         ...state,
-        flightFilter: { ...state.flightFilter, ...action.payload },
+        filteredFlights,
       }
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchFlights.pending, (state) => {
-      return { ...state, loadingFlights: true, errorFlights: '' }
-    })
-    builder.addCase(fetchFlights.fulfilled, (state, action) => {
-      return {
-        ...state,
-        loadingFlights: false,
-        flights: action.payload.flights,
-        errorFlights: '',
-      }
-    })
-    builder.addCase(fetchFlights.rejected, (state, action) => {
-      return {
-        ...state,
-        loadingFlights: false,
-        flights: [],
-        errorFlights: action.error.message as string,
-      }
-    })
+    builder
+      .addCase(fetchFlights.pending, (state) => {
+        return {
+          ...state,
+          loadingFlights: true,
+          errorFlights: '',
+        }
+      })
+      .addCase(fetchFlights.fulfilled, (state, action) => {
+        return {
+          ...state,
+          loadingFlights: false,
+          flights: action.payload.flights,
+          errorFlights: '',
+        }
+      })
+      .addCase(fetchFlights.rejected, (state, action) => {
+        return {
+          ...state,
+          loadingFlights: false,
+          flights: [],
+          errorFlights: action.error.message as string,
+        }
+      })
   },
 })
 
-export const { setFilter } = flightSlice.actions
+export const { updateFilteredFlights } = flightSlice.actions

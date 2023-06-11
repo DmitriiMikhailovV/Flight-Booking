@@ -9,16 +9,14 @@ export const RangeInput: FC<TRangeInput> = ({
   onChange,
   label,
 }) => {
-  const handleMinChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    onChange(`${fieldPrefix}.min`, parseInt(e.target.value))
+  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseInt(e.target.value)
+    onChange(`${fieldPrefix}.min`, !isNaN(newValue) ? newValue : minValue)
   }
 
-  const handleMaxChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    onChange(`${fieldPrefix}.max`, parseInt(e.target.value))
+  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseInt(e.target.value)
+    onChange(`${fieldPrefix}.max`, !isNaN(newValue) ? newValue : maxValue)
   }
 
   return (
@@ -33,7 +31,7 @@ export const RangeInput: FC<TRangeInput> = ({
           value={minValue}
           label={'Min'}
           fullWidth
-          onChange={(e) => handleMinChange(e)}
+          onChange={handleMinChange}
           inputProps={{
             step: 1,
             min: 0,
@@ -48,7 +46,7 @@ export const RangeInput: FC<TRangeInput> = ({
           label={'Max'}
           fullWidth
           value={maxValue}
-          onChange={(e) => handleMaxChange(e)}
+          onChange={handleMaxChange}
           inputProps={{
             step: 1,
             min: minValue,

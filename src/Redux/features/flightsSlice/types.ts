@@ -1,13 +1,11 @@
 export type TFetchFlights = {
   flights: Array<TFlight>
+  filteredFlights: Array<TFlight>
   loadingFlights: boolean
   errorFlights: string
-  flightFilter: TFlightFilter
 }
 
-export type TFlightSlice = {
-  flights: Array<TFlight>
-}
+export type TFlightSlice = Pick<TFetchFlights, 'flights'>
 
 export type TFlight = {
   id: number
@@ -42,6 +40,6 @@ export type TMinMax = {
 }
 
 export type TStartEndDate = {
-  startDate: number
-  endDate: number
+  startDate: number | null
+  endDate: number | null
 }

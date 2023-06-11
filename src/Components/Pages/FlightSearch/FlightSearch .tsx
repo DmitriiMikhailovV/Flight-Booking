@@ -1,12 +1,14 @@
-import React, { FC } from 'react'
-import { Box, Container } from '@mui/material'
-
+import React, { FC, useState } from 'react'
+import { Box, Container, Grid } from '@mui/material'
 import { useDispatch } from 'react-redux'
+import { CircularProgress, Typography } from '@mui/material'
+
 import { AppDispatch, useAppSelector } from 'src/Redux/store'
 import {
   fetchFlights,
-  setFilter,
+  updateFilteredFlights,
 } from 'src/Redux/features/flightsSlice/flightSlice'
+
 import {
   Button,
   DateRangeInput,
@@ -14,36 +16,72 @@ import {
   RangeInput,
   Table,
 } from 'src/Components/Generics'
-import { CircularProgress } from '@mui/material'
-import { Typography } from '@mui/material'
+
 import { columns } from './columns'
-import { TMinMax, TStartEndDate } from 'src/Redux/features/flightsSlice/types'
+import {
+  TFlightFilter,
+  TMinMax,
+  TStartEndDate,
+} from 'src/Redux/features/flightsSlice/types'
+
+const initialFilter = {
+  from: '',
+  to: '',
+  departure: {
+    startDate: null,
+    endDate: null,
+  },
+  arrival: {
+    startDate: null,
+    endDate: null,
+  },
+  duration: { min: 0, max: 24 },
+  price: { min: 0, max: 1000 },
+}
 
 export const FlightSearch: FC = () => {
-  const { flights, flightFilter, loadingFlights, errorFlights } =
-    useAppSelector((state) => state.flightSlice)
+  const { flights, loadingFlights, errorFlights, filteredFlights } =
+    useAppSelector(({ flightSlice }) => flightSlice)
 
-  // console.log(flightFilter)
+  const [flightFilter, setFlightFilter] = useState<TFlightFilter>(initialFilter)
 
   const dispatch = useDispatch<AppDispatch>()
 
   const handleFilterChange = (
     field: string,
-    value: string | number | TMinMax | TStartEndDate
+    value: string | number | TMinMax | TStartEndDate | null
   ) => {
     const [parentField, childField] = field.split('.')
-    if (childField) {
-      dispatch(
-        setFilter({
-          ...flightFilter,
-          [parentField]: Object.assign({}, flightFilter[parentField], {
+    setFlightFilter((prevFilter) => {
+      if (childField && prevFilter[parentField as keyof typeof flightFilter]) {
+        return {
+          ...prevFilter,
+          [parentField]: {
+            ...(prevFilter[parentField] as any),
             [childField]: value,
-          }),
-        })
-      )
+          },
+        }
+      } else {
+        return {
+          ...prevFilter,
+          [field]: value,
+        }
+      }
+    })
+  }
+
+  const handleSearchClick = async () => {
+    if (flights.length === 0) {
+      await dispatch(fetchFlights())
+      await dispatch(updateFilteredFlights(flightFilter))
     } else {
-      dispatch(setFilter({ [field]: value }))
+      dispatch(updateFilteredFlights(flightFilter))
     }
+  }
+
+  const handleClearFilterClick = async () => {
+    setFlightFilter(initialFilter)
+    await dispatch(updateFilteredFlights(initialFilter))
   }
 
   const filterInputFields = ['from', 'to']
@@ -72,48 +110,65 @@ export const FlightSearch: FC = () => {
           <InputField
             key={field}
             field={field}
-            value={flightFilter[field]}
+            value={flightFilter[field as keyof typeof flightFilter]}
             onChange={handleFilterChange}
             label={field.charAt(0).toUpperCase() + field.slice(1)}
           />
         ))}
         <DateRangeInput
-          fieldPrefix={'departure'}
+          fieldPrefix="departure"
           startDate={flightFilter.departure.startDate}
           endDate={flightFilter.departure.endDate}
           onChange={handleFilterChange}
-          label={'Departure'}
+          label="Departure"
         />
         <DateRangeInput
-          fieldPrefix={'arrival'}
+          fieldPrefix="arrival"
           startDate={flightFilter.arrival.startDate}
           endDate={flightFilter.arrival.endDate}
           onChange={handleFilterChange}
-          label={'Arrival'}
+          label="Arrival"
         />
         <RangeInput
-          fieldPrefix={'duration'}
+          fieldPrefix="duration"
           minValue={flightFilter.duration.min}
           maxValue={flightFilter.duration.max}
           onChange={handleFilterChange}
-          label={'Duration'}
+          label="Duration"
         />
         <RangeInput
-          fieldPrefix={'price'}
+          fieldPrefix="price"
           minValue={flightFilter.price.min}
           maxValue={flightFilter.price.max}
           onChange={handleFilterChange}
-          label={'Price'}
+          label="Price"
         />
-        <Button onClick={() => dispatch(fetchFlights())} label={'Search'} />
+        <Grid container justifyContent="flex-end" spacing={2}>
+          <Grid item>
+            <Button
+              color="secondary"
+              onClick={handleClearFilterClick}
+              label="Clear Filter"
+            />
+          </Grid>
+          <Grid item>
+            <Button onClick={handleSearchClick} label="Search" />
+          </Grid>
+        </Grid>
         {loadingFlights && <CircularProgress />}
         {errorFlights && (
-          <Typography variant="h6" color="error">
+          <Typography variant="h6" color="error" marginTop="16px">
             Error loading flights. Please try again.
           </Typography>
         )}
       </Box>
-      <Table data={flights} columns={columns} />
+      {errorFlights ? (
+        <Typography variant="h6" color="error" marginTop="16px">
+          No data found with current filter
+        </Typography>
+      ) : (
+        <Table data={filteredFlights} columns={columns} />
+      )}
     </Container>
   )
 }

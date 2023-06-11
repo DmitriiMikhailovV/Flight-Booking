@@ -4,10 +4,7 @@ import { TDateRangeInput } from './type'
 import DatePicker from 'react-datepicker'
 import './styles.css'
 import 'react-datepicker/dist/react-datepicker.css'
-import {
-  dateToUnix,
-  unixToDate,
-} from 'src/Redux/features/flightsSlice/flightSlice'
+import { dateToUnix, unixToDate } from 'src/helpers'
 
 export const DateRangeInput: FC<TDateRangeInput> = ({
   fieldPrefix,
@@ -16,12 +13,15 @@ export const DateRangeInput: FC<TDateRangeInput> = ({
   onChange,
   label,
 }) => {
-  const handleStartDateChange = (date: Date) => {
-    onChange(`${fieldPrefix}.startDate`, dateToUnix(date))
+  const handleStartDateChange = (date: Date | null) => {
+    onChange(
+      `${fieldPrefix}.startDate`,
+      date === null ? null : dateToUnix(date)
+    )
   }
 
-  const handleEndDateChange = (date: Date) => {
-    onChange(`${fieldPrefix}.endDate`, dateToUnix(date))
+  const handleEndDateChange = (date: Date | null) => {
+    onChange(`${fieldPrefix}.endDate`, date === null ? null : dateToUnix(date))
   }
 
   return (
@@ -31,26 +31,32 @@ export const DateRangeInput: FC<TDateRangeInput> = ({
       </Grid>
       <Grid item width={'70%'}>
         <DatePicker
-          selected={unixToDate(startDate)}
+          selected={startDate === null ? null : unixToDate(startDate)}
           onChange={handleStartDateChange}
           selectsStart
-          startDate={unixToDate(startDate)}
-          endDate={unixToDate(endDate)}
-          dateFormat="yyyy-MM-dd h:mm aa"
-          showTimeInput
+          startDate={startDate === null ? null : unixToDate(startDate)}
+          endDate={endDate === null ? null : unixToDate(endDate)}
+          dateFormat="yyyy-MM-dd HH:mm"
+          timeFormat="HH:mm"
+          timeIntervals={30}
+          showTimeSelect
           className="datepicker"
           placeholderText="Start Date"
+          isClearable
         />
         <DatePicker
-          selected={unixToDate(endDate)}
+          selected={endDate === null ? null : unixToDate(endDate)}
           onChange={handleEndDateChange}
           selectsEnd
-          startDate={unixToDate(startDate)}
-          endDate={unixToDate(endDate)}
-          dateFormat="yyyy-MM-dd h:mm aa"
-          showTimeInput
+          startDate={startDate === null ? null : unixToDate(startDate)}
+          endDate={endDate === null ? null : unixToDate(endDate)}
+          dateFormat="yyyy-MM-dd HH:mm"
+          timeFormat="HH:mm"
+          timeIntervals={30}
+          showTimeSelect
           className="datepicker"
           placeholderText="End Date"
+          isClearable
         />
       </Grid>
     </Grid>
