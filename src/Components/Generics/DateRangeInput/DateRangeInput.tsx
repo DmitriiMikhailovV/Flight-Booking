@@ -1,5 +1,5 @@
-import React, { FC } from 'react'
-import { Grid, InputLabel } from '@mui/material'
+import React, { FC, useState } from 'react'
+import { Grid, InputLabel, Typography } from '@mui/material'
 import { TDateRangeInput } from './type'
 import DatePicker from 'react-datepicker'
 import './styles.css'
@@ -13,15 +13,30 @@ export const DateRangeInput: FC<TDateRangeInput> = ({
   onChange,
   label,
 }) => {
-  const handleStartDateChange = (date: Date | null) => {
+  const [validationError, setValidationError] = useState<string>('')
+
+  const handleStartDateChange = (startDate: Date | null) => {
     onChange(
       `${fieldPrefix}.startDate`,
-      date === null ? null : dateToUnix(date)
+      startDate === null ? null : dateToUnix(startDate)
     )
+    endDate && validateDates(startDate, unixToDate(endDate))
   }
 
-  const handleEndDateChange = (date: Date | null) => {
-    onChange(`${fieldPrefix}.endDate`, date === null ? null : dateToUnix(date))
+  const handleEndDateChange = (endDate: Date | null) => {
+    onChange(
+      `${fieldPrefix}.endDate`,
+      endDate === null ? null : dateToUnix(endDate)
+    )
+    startDate && validateDates(unixToDate(startDate), endDate)
+  }
+
+  const validateDates = (startDate: Date | null, endDate: Date | null) => {
+    if (startDate && endDate && startDate > endDate) {
+      setValidationError('End date cannot be earlier than start date')
+    } else {
+      setValidationError('')
+    }
   }
 
   return (
@@ -58,6 +73,15 @@ export const DateRangeInput: FC<TDateRangeInput> = ({
           placeholderText="End Date"
           isClearable
         />
+        {validationError && (
+          <Typography
+            variant="body1"
+            color="error"
+            sx={{ marginTop: '8px', marginBottom: '8px' }}
+          >
+            {validationError}
+          </Typography>
+        )}
       </Grid>
     </Grid>
   )

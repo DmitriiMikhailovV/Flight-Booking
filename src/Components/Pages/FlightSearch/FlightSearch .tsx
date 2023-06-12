@@ -162,7 +162,7 @@ export const FlightSearch: FC = () => {
           </Typography>
         )}
       </Box>
-      {errorFlights ? (
+      {flights.length > 0 && filteredFlights.length === 0 ? (
         <Typography variant="h6" color="error" marginTop="16px">
           No data found with current filter
         </Typography>
