@@ -6,4 +6,5 @@ export type TInputField = Omit<TextFieldProps, 'onChange'> & {
   value: string | number | TMinMax | TStartEndDate
   onChange: (field: string, value: string) => void
   label: string
+  onlyText?: boolean
 }

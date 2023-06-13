@@ -8,17 +8,16 @@ export const InputField: FC<TInputField> = ({
   value,
   onChange,
   label,
+  onlyText,
 }) => {
   const [validationError, setValidationError] = useState<string>('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value
-    if (!/\d/.test(inputValue)) {
-      onChange(field, inputValue)
-      setValidationError('')
-    } else {
-      onChange(field, inputValue)
+    if (onlyText && e.target.value.match(/\d/)) {
       setValidationError('Field cannot contain numbers')
+    } else {
+      onChange(field, e.target.value)
+      setValidationError('')
     }
   }
 

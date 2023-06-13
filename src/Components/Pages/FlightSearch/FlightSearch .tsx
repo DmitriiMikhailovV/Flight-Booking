@@ -7,6 +7,7 @@ import { AppDispatch, useAppSelector } from 'src/Redux/store'
 import {
   fetchFlights,
   updateFilteredFlights,
+  selectFlights,
 } from 'src/Redux/features/flightsSlice/flightSlice'
 
 import {
@@ -16,6 +17,7 @@ import {
   RangeInput,
   Table,
 } from 'src/Components/Generics'
+import type { TFlight } from 'src/Redux/features/flightsSlice/types'
 
 import { columns } from './columns'
 import {
@@ -23,6 +25,7 @@ import {
   TMinMax,
   TStartEndDate,
 } from 'src/Redux/features/flightsSlice/types'
+import { useNavigate } from 'react-router-dom'
 
 const initialFilter = {
   from: '',
@@ -42,6 +45,7 @@ const initialFilter = {
 export const FlightSearch: FC = () => {
   const { flights, loadingFlights, errorFlights, filteredFlights } =
     useAppSelector(({ flightSlice }) => flightSlice)
+  const navigate = useNavigate()
 
   const [flightFilter, setFlightFilter] = useState<TFlightFilter>(initialFilter)
 
@@ -84,6 +88,11 @@ export const FlightSearch: FC = () => {
     await dispatch(updateFilteredFlights(initialFilter))
   }
 
+  const handleRowClick = (row: any) => {
+    dispatch(selectFlights(row))
+    navigate(`/booking/${row.id}`)
+  }
+
   const filterInputFields = ['from', 'to']
 
   return (
@@ -113,6 +122,7 @@ export const FlightSearch: FC = () => {
             value={flightFilter[field as keyof typeof flightFilter]}
             onChange={handleFilterChange}
             label={field.charAt(0).toUpperCase() + field.slice(1)}
+            onlyText
           />
         ))}
         <DateRangeInput
@@ -167,7 +177,11 @@ export const FlightSearch: FC = () => {
           No data found with current filter
         </Typography>
       ) : (
-        <Table data={filteredFlights} columns={columns} />
+        <Table<TFlight>
+          data={filteredFlights}
+          columns={columns}
+          onRowClick={handleRowClick}
+        />
       )}
     </Container>
   )

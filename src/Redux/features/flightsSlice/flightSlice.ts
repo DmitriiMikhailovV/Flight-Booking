@@ -8,6 +8,7 @@ const initialState: TFetchFlights = {
   filteredFlights: [],
   loadingFlights: false,
   errorFlights: '',
+  selectedFlight: null,
 }
 
 export const fetchFlights = createAsyncThunk<
@@ -70,6 +71,12 @@ export const flightSlice = createSlice({
         filteredFlights,
       }
     },
+    selectFlights(state, action) {
+      return {
+        ...state,
+        selectedFlight: action.payload,
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -99,4 +106,4 @@ export const flightSlice = createSlice({
   },
 })
 
-export const { updateFilteredFlights } = flightSlice.actions
+export const { updateFilteredFlights, selectFlights } = flightSlice.actions

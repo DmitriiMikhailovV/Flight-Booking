@@ -1,4 +1,3 @@
-import { FC } from 'react'
 import {
   Paper,
   TableHead,
@@ -8,10 +7,13 @@ import {
   TableCell,
   Table as MUITable,
 } from '@mui/material'
-
 import { TTable } from './type'
 
-export const Table: FC<TTable> = ({ columns, data }) => {
+export const Table = <T extends Record<string, unknown>>({
+  columns,
+  data,
+  onRowClick,
+}: TTable<T>) => {
   return data.length > 0 ? (
     <TableContainer component={Paper} sx={{ marginBottom: '16px' }}>
       <MUITable>
@@ -24,7 +26,11 @@ export const Table: FC<TTable> = ({ columns, data }) => {
         </TableHead>
         <TableBody>
           {data.map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
+            <TableRow
+              sx={{ cursor: onRowClick ? 'pointer' : 'default' }}
+              key={rowIndex}
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
+            >
               {columns.map((column, columnIndex) => (
                 <TableCell key={columnIndex}>
                   {row[column.property] as string}
