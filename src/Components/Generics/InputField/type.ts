@@ -7,4 +7,5 @@ export type TInputField = Omit<TextFieldProps, 'onChange'> & {
   onChange: (field: string, value: string) => void
   label: string
   onlyText?: boolean
+  phoneNumber?: boolean
 }

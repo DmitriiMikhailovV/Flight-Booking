@@ -71,11 +71,22 @@ export const flightSlice = createSlice({
         filteredFlights,
       }
     },
-    selectFlights(state, action) {
+    selectFlights: (state, action) => {
       return {
         ...state,
         selectedFlight: action.payload,
       }
+    },
+
+    updateFlightInFlights: (state, action) => {
+      const updatedFlights = state.flights.map((flight) => {
+        if (flight.id === action.payload.id) {
+          return action.payload
+        }
+        return flight
+      })
+
+      return { ...state, flights: updatedFlights }
     },
   },
   extraReducers: (builder) => {
@@ -106,4 +117,5 @@ export const flightSlice = createSlice({
   },
 })
 
-export const { updateFilteredFlights, selectFlights } = flightSlice.actions
+export const { updateFilteredFlights, selectFlights, updateFlightInFlights } =
+  flightSlice.actions

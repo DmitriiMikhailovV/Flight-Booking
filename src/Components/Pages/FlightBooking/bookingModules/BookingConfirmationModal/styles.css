@@ -1,0 +1,19 @@
+/* BookingConfirmationModal.css */
+.modalBox {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #ffffff;
+  box-shadow: 0px 0px 24px rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  width: 600px;
+}
+
+@media (max-width: 600px) {
+  .modalBox {
+    width: 95%;
+    max-height: 90%;
+    overflow-y: auto;
+  }
+}

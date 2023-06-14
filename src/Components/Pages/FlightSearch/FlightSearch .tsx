@@ -115,6 +115,9 @@ export const FlightSearch: FC = () => {
           alignItems: 'center',
         }}
       >
+        <Typography variant="h4" align="center" gutterBottom>
+          Flight Search
+        </Typography>
         {filterInputFields.map((field) => (
           <InputField
             key={field}

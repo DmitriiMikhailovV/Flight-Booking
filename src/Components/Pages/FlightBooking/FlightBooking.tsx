@@ -1,30 +1,30 @@
 import React, { FC, useEffect, useState } from 'react'
-import {
-  Box,
-  CircularProgress,
-  Container,
-  Grid,
-  Typography,
-} from '@mui/material'
-import './styles.css'
-import { Button, InputField, Table } from 'src/Components/Generics'
-import { AppDispatch, useAppSelector } from 'src/Redux/store'
+import { Box, CircularProgress, Container, Typography } from '@mui/material'
 import { useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import {
   fetchFlights,
   selectFlights,
+  updateFlightInFlights,
 } from 'src/Redux/features/flightsSlice/flightSlice'
 import { TFlight, TSeat } from 'src/Redux/features/flightsSlice/types'
-import { columns } from './columns'
+import { AppDispatch, useAppSelector } from 'src/Redux/store'
+import { Button } from 'src/Components/Generics'
+import {
+  BookingConfirmationModal,
+  FlightDetails,
+  PassengerDetails,
+  SeatSelection,
+} from './bookingModules'
+import { useNavigate } from 'react-router-dom'
 
 export const FlightBooking: FC = () => {
   const dispatch = useDispatch<AppDispatch>()
   const { id } = useParams()
+  const navigate = useNavigate()
 
   const { flights, loadingFlights, errorFlights, selectedFlight } =
     useAppSelector(({ flightSlice }) => flightSlice)
-
   const [selectedSeats, setSelectedSeats] = useState<Array<TSeat>>([])
   const [passengerDetails, setPassengerDetails] = useState({
     name: '',
@@ -32,21 +32,21 @@ export const FlightBooking: FC = () => {
     email: '',
     phone: '',
   })
-  const [bookingConfirmed, setBookingConfirmed] = useState(false)
-
-  console.log(bookingConfirmed)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [errorForm, setErrorForm] = useState(false)
 
   useEffect(() => {
-    if (!flights || flights.length === 0) {
-      dispatch(fetchFlights())
-      const selected: TFlight | undefined = undefined
-      dispatch(selectFlights(selected))
-    } else {
-      const selected: TFlight | undefined = flights.find(
-        (flight) => flight.id === Number(id)
-      )
-      selected && dispatch(selectFlights(selected))
+    const getSelectedFlight = () => {
+      if (!flights || flights.length === 0) {
+        dispatch(fetchFlights())
+        dispatch(selectFlights(undefined))
+      } else {
+        const selected = flights.find((flight) => flight.id === Number(id))
+        selected && dispatch(selectFlights(selected))
+      }
     }
+
+    getSelectedFlight()
   }, [flights, id])
 
   const handleInputChange = (field: string, value: string) => {
@@ -57,19 +57,34 @@ export const FlightBooking: FC = () => {
   }
 
   const handleBookingConfirmation = () => {
-    setBookingConfirmed(true)
-  }
+    if (selectedFlight) {
+      const { name, surname, email, phone } = passengerDetails
 
-  const getSeatClassName = (seat: TSeat, available: boolean) => {
-    let className = 'seat'
-    if (selectedSeats.find((selectedSeat) => selectedSeat.id === seat.id)) {
-      className += ' selected'
-    } else if (!available) {
-      className += ' unavailable'
-    } else {
-      className += ' available'
+      if (
+        name.trim() === '' ||
+        surname.trim() === '' ||
+        email.trim() === '' ||
+        phone.trim() === '' ||
+        selectedSeats.length === 0
+      ) {
+        setErrorForm(true)
+      } else {
+        const updatedSeats: Array<TSeat> = selectedFlight.seats.map((seat) => {
+          const matchingSeat = selectedSeats.find(
+            (selectedSeat) => seat.id === selectedSeat.id
+          )
+          return matchingSeat ? { ...matchingSeat } : seat
+        })
+
+        const updatedFlight: TFlight = {
+          ...selectedFlight,
+          seats: updatedSeats,
+        }
+
+        dispatch(updateFlightInFlights(updatedFlight))
+        setIsModalOpen(true)
+      }
     }
-    return className
   }
 
   const handleSeatClick = (seat: TSeat) => {
@@ -88,129 +103,86 @@ export const FlightBooking: FC = () => {
     }
   }
 
-  return (
-    <Container
-      maxWidth="lg"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        flexDirection: 'column',
-      }}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          marginTop: '16px',
-          gap: '16px',
-          flexDirection: 'column',
-          width: '40%',
-          minWidth: '250px',
-          alignItems: 'center',
-        }}
-      >
-        <Typography variant="h4" align="center" gutterBottom>
-          Seat Selection
-        </Typography>
-        {loadingFlights && <CircularProgress />}
-        {errorFlights && (
-          <Typography variant="h6" color="error" marginTop="16px">
-            Error loading flights. Please try again.
-          </Typography>
-        )}
-        {selectedFlight && (
-          <>
-            <Box>
-              <Typography variant="h6" align="center" gutterBottom>
-                Flight Details:
-              </Typography>
-              {selectedFlight && (
-                <Table<TFlight> columns={columns} data={[selectedFlight]} />
-              )}
-              <Box>
-                <Typography variant="h5" align="center" gutterBottom>
-                  Seat Selection
-                </Typography>
-              </Box>
-            </Box>
+  const closeModal = () => {
+    setIsModalOpen(false)
+  }
 
-            <Grid
-              container
-              spacing={3}
-              justifyContent={'center'}
-              width={'100%'}
-              minWidth={'250px'}
-              padding={'20px'}
-            >
-              <Typography variant="h6" align="center">
-                Please select your preferred seat(s):
+  const onNavigateToSearch = () => {
+    navigate(`/search`)
+  }
+
+  return (
+    <Container maxWidth="lg">
+      <Box display="flex" alignItems="center" flexDirection="column">
+        <Box
+          sx={{
+            display: 'flex',
+            marginTop: '16px',
+            gap: '16px',
+            flexDirection: 'column',
+            width: '40%',
+            minWidth: '250px',
+            alignItems: 'center',
+          }}
+        >
+          <Typography variant="h4" align="center" gutterBottom>
+            Booking flight
+          </Typography>
+          {loadingFlights && <CircularProgress />}
+          {errorFlights && (
+            <Typography variant="h6" color="error" marginTop="16px">
+              Error loading flights. Please try again.
+            </Typography>
+          )}
+          {selectedFlight && (
+            <>
+              <FlightDetails flight={selectedFlight} />
+              <SeatSelection
+                selectedFlight={selectedFlight}
+                selectedSeats={selectedSeats}
+                handleSeatClick={handleSeatClick}
+              />
+            </>
+          )}
+          <PassengerDetails
+            passengerDetails={passengerDetails}
+            handleInputChange={handleInputChange}
+          />
+          {errorForm && (
+            <>
+              <Typography variant="h6" color="error" marginTop="8px">
+                At least one seat must be selected.
               </Typography>
-              <Grid width={'100%'} justifyContent="center">
-                <Grid
-                  container
-                  spacing={1}
-                  justifyContent="center"
-                  padding={'20px'}
-                >
-                  {selectedFlight ? (
-                    selectedFlight.seats.map((seat) => (
-                      <Grid item key={seat.id}>
-                        <div
-                          onClick={() => handleSeatClick(seat)}
-                          className={getSeatClassName(seat, seat.available)}
-                        >
-                          {seat.number}
-                        </div>
-                      </Grid>
-                    ))
-                  ) : (
-                    <Typography variant="body1" align="center">
-                      You have not selected a flight
-                    </Typography>
-                  )}
-                </Grid>
-              </Grid>
-            </Grid>
-          </>
-        )}
-        <Typography variant="h4" align="center" gutterBottom>
-          Passenger Details
-        </Typography>
-        <InputField
-          field="name"
-          label="name"
-          value={passengerDetails.name}
-          onChange={handleInputChange}
-          onlyText
-        />
-        <InputField
-          field="surname"
-          label="surname"
-          value={passengerDetails.surname}
-          onChange={handleInputChange}
-          onlyText
-        />
-        <InputField
-          field="email"
-          type="email"
-          label="email"
-          value={passengerDetails.email}
-          onChange={handleInputChange}
-        />
-        <InputField
-          field="phone"
-          type="tel"
-          label="phone"
-          value={passengerDetails.phone}
-          onChange={handleInputChange}
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleBookingConfirmation}
-          fullWidth
-          label="Confirm Booking"
-        />
+              <Typography variant="h6" color="error">
+                All fields are required.
+              </Typography>
+            </>
+          )}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleBookingConfirmation}
+            fullWidth
+            label="Confirm Booking"
+          />
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={onNavigateToSearch}
+            fullWidth
+            label="Go to Search Flights"
+          />
+        </Box>
       </Box>
+
+      <BookingConfirmationModal
+        isModalOpen={isModalOpen}
+        selectedFlight={selectedFlight}
+        selectedSeats={selectedSeats}
+        passengerDetails={passengerDetails}
+        closeModal={closeModal}
+        navigateToSearch={onNavigateToSearch}
+      />
     </Container>
   )
 }

@@ -9,17 +9,24 @@ export const InputField: FC<TInputField> = ({
   onChange,
   label,
   onlyText,
+  phoneNumber,
 }) => {
   const [validationError, setValidationError] = useState<string>('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (onlyText && e.target.value.match(/\d/)) {
+    const inputValue = e.target.value
+
+    if (onlyText && inputValue.match(/\d/)) {
       setValidationError('Field cannot contain numbers')
+    } else if (phoneNumber && !/^\+?\d*$/.test(inputValue)) {
+      setValidationError('Invalid phone number')
     } else {
-      onChange(field, e.target.value)
+      onChange(field, inputValue)
       setValidationError('')
     }
   }
+
+  const prefillValue = phoneNumber && value === '' ? '+' : value
 
   return (
     <>
@@ -30,7 +37,7 @@ export const InputField: FC<TInputField> = ({
         <Grid item xs>
           <TextField
             type="text"
-            value={value}
+            value={prefillValue}
             size="small"
             fullWidth
             onChange={handleChange}
