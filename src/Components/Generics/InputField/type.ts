@@ -5,6 +5,7 @@ export type TInputField = Omit<TextFieldProps, 'onChange'> & {
   field: string
   value: string | number | TMinMax | TStartEndDate
   onChange: (field: string, value: string) => void
+  validationError: string
   label: string
   onlyText?: boolean
   phoneNumber?: boolean

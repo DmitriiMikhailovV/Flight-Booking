@@ -47,7 +47,7 @@ export const FlightBooking: FC = () => {
     }
 
     getSelectedFlight()
-  }, [flights, id])
+  }, [flights, id, dispatch])
 
   const handleInputChange = (field: string, value: string) => {
     setPassengerDetails((prevPassengerDetails) => ({

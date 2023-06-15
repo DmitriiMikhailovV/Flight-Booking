@@ -27,6 +27,7 @@ export const PassengerDetails: FC<TPassengerDetails> = ({
         label="Name"
         value={passengerDetails.name}
         onChange={handleInputChange}
+        validationError={''}
         onlyText
       />
       <InputField
@@ -34,6 +35,7 @@ export const PassengerDetails: FC<TPassengerDetails> = ({
         label="Surname"
         value={passengerDetails.surname}
         onChange={handleInputChange}
+        validationError={''}
         onlyText
       />
       <InputField
@@ -41,12 +43,14 @@ export const PassengerDetails: FC<TPassengerDetails> = ({
         label="Email"
         value={passengerDetails.email}
         onChange={handleInputChange}
+        validationError={''}
       />
       <InputField
         field="phone"
         label="Phone"
         value={passengerDetails.phone}
         onChange={handleInputChange}
+        validationError={''}
         phoneNumber
       />
     </Box>

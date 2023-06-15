@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react'
+import React, { FC } from 'react'
 import { Grid, TextField, Typography } from '@mui/material'
 import { TInputField } from './type'
 import { InputLabel } from '@mui/material'
@@ -8,22 +8,12 @@ export const InputField: FC<TInputField> = ({
   value,
   onChange,
   label,
-  onlyText,
+  validationError,
   phoneNumber,
 }) => {
-  const [validationError, setValidationError] = useState<string>('')
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value
-
-    if (onlyText && inputValue.match(/\d/)) {
-      setValidationError('Field cannot contain numbers')
-    } else if (phoneNumber && !/^\+?\d*$/.test(inputValue)) {
-      setValidationError('Invalid phone number')
-    } else {
-      onChange(field, inputValue)
-      setValidationError('')
-    }
+    onChange(field, inputValue)
   }
 
   const prefillValue = phoneNumber && value === '' ? '+' : value
@@ -43,7 +33,7 @@ export const InputField: FC<TInputField> = ({
             onChange={handleChange}
             variant="outlined"
           />
-          {validationError && (
+          {validationError !== '' && (
             <Typography
               variant="body1"
               color="error"
