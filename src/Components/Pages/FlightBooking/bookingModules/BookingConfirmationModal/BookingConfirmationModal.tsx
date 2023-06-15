@@ -20,7 +20,12 @@ export const BookingConfirmationModal: FC<TBookingConfirmationModal> = ({
           <Typography variant="h5" align="center" gutterBottom>
             Booking completed
           </Typography>
-          {selectedFlight && <FlightDetails flight={selectedFlight} />}
+          {selectedFlight && (
+            <FlightDetails
+              flight={selectedFlight}
+              selectedSeats={selectedSeats}
+            />
+          )}
           <Box mt={2}>
             <Typography variant="h6" align="center" gutterBottom>
               Your Seats:

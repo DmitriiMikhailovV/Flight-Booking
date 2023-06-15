@@ -28,6 +28,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { TValidationErrors } from './type'
 import { validateFlightFilter } from './flightSearchValidation'
+import { humanDate } from 'src/utilits'
 
 const initialFilter: TFlightFilter = {
   from: '',
@@ -114,6 +115,12 @@ export const FlightSearch: FC = () => {
     dispatch(selectFlights(row))
     navigate(`/booking/${row.id}`)
   }
+
+  const updatedFilteredFlights = flights.map((flight) => ({
+    ...flight,
+    departure: humanDate(flight.departure),
+    arrival: humanDate(flight.arrival),
+  }))
 
   const filterInputFields = ['from', 'to']
 
@@ -208,7 +215,7 @@ export const FlightSearch: FC = () => {
         </Typography>
       ) : (
         <Table<TFlight>
-          data={filteredFlights}
+          data={updatedFilteredFlights}
           columns={columns}
           onRowClick={handleRowClick}
         />

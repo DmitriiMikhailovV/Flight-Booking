@@ -136,7 +136,10 @@ export const FlightBooking: FC = () => {
           )}
           {selectedFlight && (
             <>
-              <FlightDetails flight={selectedFlight} />
+              <FlightDetails
+                flight={selectedFlight}
+                selectedSeats={selectedSeats}
+              />
               <SeatSelection
                 selectedFlight={selectedFlight}
                 selectedSeats={selectedSeats}

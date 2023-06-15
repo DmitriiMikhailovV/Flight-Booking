@@ -6,5 +6,5 @@ export const columns: Array<TTableColumn> = [
   { label: 'Departure', property: 'departure' },
   { label: 'Arrival', property: 'arrival' },
   { label: 'Duration', property: 'duration' },
-  { label: 'Price', property: 'price' },
+  { label: 'Price', property: 'price', dynamic: true },
 ]
