@@ -7,6 +7,5 @@ export type TInputField = Omit<TextFieldProps, 'onChange'> & {
   onChange: (field: string, value: string) => void
   validationError: string
   label: string
-  onlyText?: boolean
   phoneNumber?: boolean
 }

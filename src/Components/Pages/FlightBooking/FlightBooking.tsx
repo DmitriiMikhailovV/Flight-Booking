@@ -17,6 +17,17 @@ import {
   SeatSelection,
 } from './bookingModules'
 import { useNavigate } from 'react-router-dom'
+import { TValidationErrors } from '../FlightSearch/type'
+import { validateFlightBooking } from './flightBookingValidation'
+import { TPassengersDetails } from './bookingModules/type'
+
+const initialValidationError: TValidationErrors = {
+  selectedSeats: '',
+  name: '',
+  surname: '',
+  email: '',
+  phone: '',
+}
 
 export const FlightBooking: FC = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -26,14 +37,16 @@ export const FlightBooking: FC = () => {
   const { flights, loadingFlights, errorFlights, selectedFlight } =
     useAppSelector(({ flightSlice }) => flightSlice)
   const [selectedSeats, setSelectedSeats] = useState<Array<TSeat>>([])
-  const [passengerDetails, setPassengerDetails] = useState({
+  const [passengerDetails, setPassengerDetails] = useState<TPassengersDetails>({
     name: '',
     surname: '',
     email: '',
     phone: '',
   })
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [errorForm, setErrorForm] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<TValidationErrors>(
+    initialValidationError
+  )
 
   useEffect(() => {
     const getSelectedFlight = () => {
@@ -57,18 +70,10 @@ export const FlightBooking: FC = () => {
   }
 
   const handleBookingConfirmation = () => {
-    if (selectedFlight) {
-      const { name, surname, email, phone } = passengerDetails
+    const errors = validateFlightBooking({ selectedSeats, ...passengerDetails })
 
-      if (
-        name.trim() === '' ||
-        surname.trim() === '' ||
-        email.trim() === '' ||
-        phone.trim() === '' ||
-        selectedSeats.length === 0
-      ) {
-        setErrorForm(true)
-      } else {
+    if (Object.values(errors).every((value) => value === '')) {
+      if (selectedFlight) {
         const updatedSeats: Array<TSeat> = selectedFlight.seats.map((seat) => {
           const matchingSeat = selectedSeats.find(
             (selectedSeat) => seat.id === selectedSeat.id
@@ -84,6 +89,8 @@ export const FlightBooking: FC = () => {
         dispatch(updateFlightInFlights(updatedFlight))
         setIsModalOpen(true)
       }
+    } else {
+      setValidationErrors(errors)
     }
   }
 
@@ -120,12 +127,12 @@ export const FlightBooking: FC = () => {
             marginTop: '16px',
             gap: '16px',
             flexDirection: 'column',
-            width: '40%',
+            width: '50%',
             minWidth: '250px',
             alignItems: 'center',
           }}
         >
-          <Typography variant="h4" align="center" gutterBottom>
+          <Typography variant="h4" align="center">
             Booking flight
           </Typography>
           {loadingFlights && <CircularProgress />}
@@ -144,23 +151,15 @@ export const FlightBooking: FC = () => {
                 selectedFlight={selectedFlight}
                 selectedSeats={selectedSeats}
                 handleSeatClick={handleSeatClick}
+                validationErrors={validationErrors}
               />
             </>
           )}
           <PassengerDetails
             passengerDetails={passengerDetails}
             handleInputChange={handleInputChange}
+            validationErrors={validationErrors}
           />
-          {errorForm && (
-            <>
-              <Typography variant="h6" color="error" marginTop="8px">
-                At least one seat must be selected.
-              </Typography>
-              <Typography variant="h6" color="error">
-                All fields are required.
-              </Typography>
-            </>
-          )}
           <Button
             variant="contained"
             color="primary"

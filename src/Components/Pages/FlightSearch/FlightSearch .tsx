@@ -27,8 +27,7 @@ import {
 } from 'src/Redux/features/flightsSlice/types'
 import { useNavigate } from 'react-router-dom'
 import { TValidationErrors } from './type'
-import { validateFlightFilter } from './flightSearchValidation'
-import { humanDate } from 'src/utilits'
+import { validateFlightSearch } from './flightSearchValidation'
 
 const initialFilter: TFlightFilter = {
   from: '',
@@ -45,7 +44,7 @@ const initialFilter: TFlightFilter = {
   price: { min: 0, max: 1000 },
 }
 
-const initialError: TValidationErrors = {
+const initialValidationError: TValidationErrors = {
   from: '',
   to: '',
   departure: '',
@@ -54,14 +53,20 @@ const initialError: TValidationErrors = {
   price: '',
 }
 
+const filterInputFields = [
+  { field: 'from', label: 'From' },
+  { field: 'to', label: 'To' },
+]
+
 export const FlightSearch: FC = () => {
   const { flights, loadingFlights, errorFlights, filteredFlights } =
     useAppSelector(({ flightSlice }) => flightSlice)
   const navigate = useNavigate()
 
   const [flightFilter, setFlightFilter] = useState<TFlightFilter>(initialFilter)
-  const [validationErrors, setValidationErrors] =
-    useState<TValidationErrors>(initialError)
+  const [validationErrors, setValidationErrors] = useState<TValidationErrors>(
+    initialValidationError
+  )
 
   const dispatch = useDispatch<AppDispatch>()
 
@@ -89,16 +94,16 @@ export const FlightSearch: FC = () => {
   }
 
   const handleSearchClick = async () => {
-    const errors = validateFlightFilter(flightFilter)
+    const errors = validateFlightSearch(flightFilter)
 
     if (Object.values(errors).every((value) => value === '')) {
       if (flights.length === 0) {
         await dispatch(fetchFlights())
         await dispatch(updateFilteredFlights(flightFilter))
-        setValidationErrors(initialError)
+        setValidationErrors(initialValidationError)
       } else {
         dispatch(updateFilteredFlights(flightFilter))
-        setValidationErrors(initialError)
+        setValidationErrors(initialValidationError)
       }
     } else {
       setValidationErrors(errors)
@@ -107,7 +112,7 @@ export const FlightSearch: FC = () => {
 
   const handleClearFilterClick = async () => {
     setFlightFilter(initialFilter)
-    setValidationErrors(initialError)
+    setValidationErrors(initialValidationError)
     await dispatch(updateFilteredFlights(initialFilter))
   }
 
@@ -115,14 +120,6 @@ export const FlightSearch: FC = () => {
     dispatch(selectFlights(row))
     navigate(`/booking/${row.id}`)
   }
-
-  const updatedFilteredFlights = flights.map((flight) => ({
-    ...flight,
-    departure: humanDate(flight.departure),
-    arrival: humanDate(flight.arrival),
-  }))
-
-  const filterInputFields = ['from', 'to']
 
   return (
     <Container
@@ -139,7 +136,7 @@ export const FlightSearch: FC = () => {
           marginTop: '16px',
           gap: '16px',
           flexDirection: 'column',
-          width: '40%',
+          width: '50%',
           minWidth: '250px',
           alignItems: 'center',
         }}
@@ -147,15 +144,14 @@ export const FlightSearch: FC = () => {
         <Typography variant="h4" align="center" gutterBottom>
           Flight Search
         </Typography>
-        {filterInputFields.map((field) => (
+        {filterInputFields.map(({ field, label }) => (
           <InputField
             key={field}
             field={field}
+            label={label}
             value={flightFilter[field as keyof typeof flightFilter]}
             onChange={handleFilterChange}
             validationError={validationErrors[field]}
-            label={field.charAt(0).toUpperCase() + field.slice(1)}
-            onlyText
           />
         ))}
         <DateRangeInput
@@ -215,7 +211,7 @@ export const FlightSearch: FC = () => {
         </Typography>
       ) : (
         <Table<TFlight>
-          data={updatedFilteredFlights}
+          data={filteredFlights}
           columns={columns}
           onRowClick={handleRowClick}
         />

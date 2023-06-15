@@ -30,7 +30,7 @@ export const FlightDetails: FC<TFlightDetails> = ({
   }
 
   return (
-    <Box>
+    <Box sx={{ maxWidth: '100%' }}>
       <Typography variant="h6" align="center">
         Flight Details:
       </Typography>

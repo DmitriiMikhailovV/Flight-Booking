@@ -1,3 +1,5 @@
+import { TValidationErrors } from 'src/Components/Pages/FlightSearch/type'
+
 export type TPassengerDetails = {
   passengerDetails: {
     name: string
@@ -6,4 +8,5 @@ export type TPassengerDetails = {
     phone: string
   }
   handleInputChange: (field: string, value: string) => void
+  validationErrors: TValidationErrors
 }

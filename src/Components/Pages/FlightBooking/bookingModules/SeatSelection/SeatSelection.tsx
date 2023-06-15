@@ -4,10 +4,15 @@ import { TSeatSelection } from './type'
 import { TSeat } from 'src/Redux/features/flightsSlice/types'
 import './styles.css'
 
-export const SeatSelection: FC<TSeatSelection> = ({
+interface SeatSelectionProps extends TSeatSelection {
+  handleSeatClick: (seat: TSeat) => void
+}
+
+export const SeatSelection: FC<SeatSelectionProps> = ({
   selectedFlight,
   selectedSeats,
   handleSeatClick,
+  validationErrors,
 }) => {
   const getSeatClassName = (seat: TSeat, available: boolean) => {
     let className = 'seat'
@@ -30,13 +35,15 @@ export const SeatSelection: FC<TSeatSelection> = ({
       minWidth="250px"
       padding="20px"
     >
-      <Typography variant="h6" align="center">
-        Please select your preferred seat(s):
-      </Typography>
-      <Grid width="100%" justifyContent="center">
-        <Grid container spacing={1} justifyContent="center" padding="20px">
-          {selectedFlight ? (
-            selectedFlight.seats.map((seat) => (
+      <Grid item xs={12}>
+        <Typography variant="h6" align="center">
+          Please select your preferred seat(s):
+        </Typography>
+      </Grid>
+      <Grid item xs={12} flexDirection={'column'}>
+        {selectedFlight ? (
+          <Grid container spacing={1} justifyContent="center" padding="20px">
+            {selectedFlight.seats.map((seat) => (
               <Grid item key={seat.id}>
                 <div
                   onClick={() => handleSeatClick(seat)}
@@ -45,14 +52,23 @@ export const SeatSelection: FC<TSeatSelection> = ({
                   {seat.number}
                 </div>
               </Grid>
-            ))
-          ) : (
-            <Typography variant="body1" align="center">
-              You have not selected a flight
-            </Typography>
-          )}
-        </Grid>
+            ))}
+          </Grid>
+        ) : (
+          <Typography variant="body1" align="center">
+            You have not selected a flight
+          </Typography>
+        )}
       </Grid>
+      {validationErrors.selectedSeats !== '' && (
+        <Typography
+          variant="body1"
+          color="error"
+          sx={{ marginTop: '8px', marginBottom: '8px' }}
+        >
+          {validationErrors.selectedSeats}
+        </Typography>
+      )}
     </Grid>
   )
 }

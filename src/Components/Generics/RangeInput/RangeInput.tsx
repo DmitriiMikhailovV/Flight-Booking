@@ -25,6 +25,7 @@ export const RangeInput: FC<TRangeInput> = ({
       container
       spacing={1}
       alignItems="center"
+      // justifyContent="flex-end"
       sx={{ marginTop: '2px', marginBottom: '2px' }}
     >
       <Grid item sx={{ width: '30%', minWidth: '100px' }}>

@@ -1,7 +1,7 @@
 import { TFlightFilter } from 'src/Redux/features/flightsSlice/types'
 import { TValidationErrors } from './type'
 
-export const validateFlightFilter = ({
+export const validateFlightSearch = ({
   from,
   to,
   departure,
