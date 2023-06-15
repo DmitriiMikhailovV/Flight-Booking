@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC } from 'react'
 import { Grid, TextField, InputLabel, Typography } from '@mui/material'
 import { TRangeInput } from './type'
 
@@ -7,28 +7,17 @@ export const RangeInput: FC<TRangeInput> = ({
   minValue,
   maxValue,
   onChange,
+  validationError,
   label,
 }) => {
-  const [validationError, setValidationError] = useState<string>('')
-
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseInt(e.target.value)
-    if (newValue > maxValue) {
-      setValidationError('The max value should be greater than the min value.')
-    } else {
-      setValidationError('')
-      onChange(`${fieldPrefix}.min`, !isNaN(newValue) ? newValue : minValue)
-    }
+    onChange(`${fieldPrefix}.min`, !isNaN(newValue) ? newValue : minValue)
   }
 
   const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseInt(e.target.value)
-    if (newValue < minValue) {
-      setValidationError('The max value should be greater than the min value.')
-    } else {
-      setValidationError('')
-      onChange(`${fieldPrefix}.max`, !isNaN(newValue) ? newValue : maxValue)
-    }
+    onChange(`${fieldPrefix}.max`, !isNaN(newValue) ? newValue : maxValue)
   }
 
   return (
@@ -36,6 +25,7 @@ export const RangeInput: FC<TRangeInput> = ({
       container
       spacing={1}
       alignItems="center"
+      // justifyContent="flex-end"
       sx={{ marginTop: '2px', marginBottom: '2px' }}
     >
       <Grid item sx={{ width: '30%', minWidth: '100px' }}>

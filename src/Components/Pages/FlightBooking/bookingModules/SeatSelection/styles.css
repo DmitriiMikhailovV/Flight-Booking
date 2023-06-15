@@ -1,0 +1,28 @@
+.seat {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px;
+  margin: 5px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.unavailable {
+  background: #f44336;
+  color: #fff;
+  cursor: not-allowed;
+}
+
+.available {
+  background: #4caf50;
+}
+
+.selected {
+  background: #ffc107;
+  color: #000;
+}

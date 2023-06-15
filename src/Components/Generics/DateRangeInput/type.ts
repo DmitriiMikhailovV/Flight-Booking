@@ -3,5 +3,6 @@ export type TDateRangeInput = {
   startDate: number | null
   endDate: number | null
   onChange: (field: string, value: number | null) => void
+  validationError: string
   label: string
 }

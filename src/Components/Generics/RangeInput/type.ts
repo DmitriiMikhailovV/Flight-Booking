@@ -5,5 +5,6 @@ export type TRangeInput = Omit<TextFieldProps, 'onChange'> & {
   minValue: number
   maxValue: number
   onChange: (field: string, value: number) => void
+  validationError: string
   label: string
 }

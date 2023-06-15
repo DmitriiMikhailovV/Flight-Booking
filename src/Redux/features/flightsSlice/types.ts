@@ -3,6 +3,7 @@ export type TFetchFlights = {
   filteredFlights: Array<TFlight>
   loadingFlights: boolean
   errorFlights: string
+  selectedFlight: null | TFlight
 }
 
 export type TFlightSlice = Pick<TFetchFlights, 'flights'>
