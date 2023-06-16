@@ -48,17 +48,17 @@ export const FlightBooking: FC = () => {
     initialValidationError
   )
 
-  useEffect(() => {
-    const getSelectedFlight = () => {
-      if (!flights || flights.length === 0) {
-        dispatch(fetchFlights())
-        dispatch(selectFlights(undefined))
-      } else {
-        const selected = flights.find((flight) => flight.id === Number(id))
-        selected && dispatch(selectFlights(selected))
-      }
+  const getSelectedFlight = () => {
+    if (!flights || flights.length === 0) {
+      dispatch(fetchFlights())
+      dispatch(selectFlights(undefined))
+    } else {
+      const selected = flights.find((flight) => flight.id === Number(id))
+      selected && dispatch(selectFlights(selected))
     }
+  }
 
+  useEffect(() => {
     getSelectedFlight()
   }, [flights, id, dispatch])
 
@@ -87,6 +87,8 @@ export const FlightBooking: FC = () => {
         }
 
         dispatch(updateFlightInFlights(updatedFlight))
+        getSelectedFlight()
+        setSelectedSeats([])
         setIsModalOpen(true)
       }
     } else {
